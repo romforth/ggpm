@@ -100,7 +100,7 @@ int main (int argc, char **argv) {
     	  error(1, "Cannot open output file");
       optind++;
     }
-  GPM(1000);
+  GPM(10000);
   if (input != stdin)
 	  fclose(input);
   if (output != stdout)
@@ -118,11 +118,11 @@ const int MST[] = { -1, 4, 'D','E','F',-1,
               0,4,'V','A','L',-2,
               6, 7, 'U','P','D','A','T','E',-3,
               12,4,'B','I','N',-4,
-              31,4,'D','E','C',-5,
+              21,4,'D','E','C',-5,
               27,4,'B','A','R',-6};
 
 
-void NextCh(int *ST, int *A, int *C) {
+static void NextCh(int *ST, int *A, int *C) {
 	if (*C == 0)
           *A = getc(input);
     else {
@@ -131,7 +131,7 @@ void NextCh(int *ST, int *A, int *C) {
     }
 }
 
-void Load(int *ST, int *S, int A, int H) {
+static void Load(int *ST, int *S, int A, int H) {
 	if (H == 0) {
         putc(A, output);
 	} else {
@@ -140,7 +140,7 @@ void Load(int *ST, int *S, int A, int H) {
     }
 }
 
-void Find(int *ST, int *A, int *W, int E, int x) {
+static int Find(int *ST, int *A, int *W, int E, int x) {
 	int r;
 	*A = E;
     *W = x;
@@ -150,16 +150,17 @@ void Find(int *ST, int *A, int *W, int E, int x) {
                    goto Next;
   	     }
          *W = *A + 1 + ST[*W];
+         return 1;
        Next:
          *A = ST[*A];
      } while(*A >= 0);
-//       goto Monitor7
+     return 0;
 }
 
 // This routine outputs the item on the stack starting at ST[x]
 // if the item is not complete, printing stops at ST[S-1] and
 // is follows by '...(Incomplete)'.
-void Item(int *ST, int *S, int x) {
+static void Item(int *ST, int *S, int x) {
     int k, n = ST[x]==0 ? *S-x-1 : ST[x]-1;
     for (k = 1; k <= n; k++) {
         Load(ST, S, ST[x+k], 0);
@@ -228,7 +229,8 @@ Scan:     if (q == 1)
 Fn:
 		  ST[S] = H;
 		  ST[S+1] = F;
-		  ST[S+2] = ST[S+3];
+		  ST[S+2] = 0;
+		  ST[S+3] = 0;
 		  H = S+3;
 		  F = S+1;
 		  S = S+4;
@@ -244,17 +246,23 @@ Apply:    if (P > F)
 	          goto Monitor1;
           if (H==0)
         	  goto Copy;
-          ST[S] = S - H;
-          ST[F-1] = Marker;
-          ST[F] = S - F + 2;
-          ST[F+1] = C;
-          P = F;
-          H = ST[F-1];
-          S = S + 1;
-          F = ST[F];
-          if (H!=0)
+          {
+            int f0 = ST[F];
+            int h0 = ST[F-1];
+        	ST[H] = S - H;
+            ST[S] = Marker;
+            ST[F-1] = S - F + 2;
+            ST[F] = P;
+            ST[F+1] = C;
+            P = F;
+            H = h0;
+            S = S + 1;
+            F = f0;
+          }
+          if (H != 0)
              ST[H] = ST[H] + ST[P-1];
-          Find(ST, &A, &W, E, P+2);
+          if (!Find(ST, &A, &W, E, P+2))
+        	  goto Monitor7;
 
           if (ST[W] < 0) {
         	  switch(-ST[W]) {
@@ -304,7 +312,7 @@ EndFn:    if (F > P)
               W = ST[W];
           ST[A] = W;
           E = ST[S];
-          while (H!=0) {
+          if (H!=0) {
               if (H > P)
                   H = H - ST[P-1];
               else
@@ -335,14 +343,16 @@ DEF:      if (H != 0) {
 
 // This version of DEF is shorter than that given in
 // Section 7 as it leaves EndFn to copy back the definition.
-VAL:      Find(ST, &A, &W, E, P+6);
+VAL:      if(!Find(ST, &A, &W, E, P+6))
+	          goto Monitor7;
           while (ST[W+1] != Marker) {
               A = ST[W+1];
               W = W+1;
               Load(ST, &S, A, H);
           }
           goto EndFn;
-UPDATE:   Find(ST, &A, &W, E, P+6);
+UPDATE:   if (!Find(ST, &A, &W, E, P+6))
+	          goto Monitor7;
           A = P + 9 + ST[P+9];
           if (ST[A] > ST[W])
         	  goto Monitor9;

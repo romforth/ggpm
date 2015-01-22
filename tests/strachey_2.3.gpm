@@ -1,0 +1,9 @@
+$DEF,A,<A~1A>;
+$DEF,B,<B$A,X~1X;B>;
+$DEF,APA,<P~1~1P>;
+Q<$A,C;>R
+$A,<$A,X;>;
+$B,<$A,X;>;
+Q<$>R<;>
+Q<<$A,C;>>R
+

@@ -1,0 +1,12 @@
+$DEF,Log,<Log(~1)>;
+$DEF,Sin,<Sin(~1)>;
+$DEF,FNPROD,<$DEF,~1~2,<$>~1<,$>~2<,~1;;>;>;
+$FNPROD,Log,Sin;
+$DEF,LogSin2,<$Log,$Sin,~1;;>;
+$LogSin,x;
+$LogSin2,x;
+$DEF,Suc,<$1,2,3,4,5,6,7,8,9,10,$DEF,1,<~>~1;;>;
+$DEF,Successor,<$~2,$DEF,~2,~1<,$Suc,>~2<;>;$DEF,9,<$Suc,>~1<;,0>;;>;
+$DEF,Sum,<$S,~1,~2,0,$DEF,S,<$~3,$DEF,~3,<$S,>$Successor,~1,~2;<,>$Suc,~3;<;>;$DEF,>~3<,~1<,>~2;;>;;>;
+<$Sum,4,1,1;>
+

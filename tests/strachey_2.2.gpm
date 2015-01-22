@@ -1,0 +1,12 @@
+$DEF,A,<A~1A>;
+$DEF,B,<B$A,X~1X;B>;
+$DEF,APA,<P~1~1P>;
+$A,C;
+$A,ACA;
+$A,$A,C;;
+$A,XDX;
+$B,D;
+$A,P;
+$APA,Y;
+$$A,P;,Y;
+
