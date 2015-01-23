@@ -1,0 +1,17 @@
+This is a re-implementation of the classic macro processor GPM
+with some minor extensions. The original implementation is
+described in the article Strachey, Christopher (October 1965).
+"A General Purpose  Macrogenerator". Computer Journal 8 (3): 225–241.
+http://comjnl.oxfordjournals.org/content/8/3/225.full.pdf
+
+This implementation is still a work in progress. It has
+a few known bugs and a long list of proposed improvements.
+The latest version of ggpm can be obtained by:
+git clone https://sphinx.pinastri@code.google.com/p/ggpm/
+ 
+Any contributions to the project are always welcome.
+Please direct your questions, comments or patches to:
+
+Peter Cherepanov <sphinx.pinastri@gmail.com>
+Elina Batyrova   <lundrleht@gmail.com>
+

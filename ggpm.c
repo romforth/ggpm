@@ -1,5 +1,5 @@
 /* Re-implementation of a classic macro processor GPM.
-   Copyright (C) 2014 P. Cherepanov and E. Batyrova.
+   Copyright (C) 2014-2015 P. Cherepanov and E. Batyrova.
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
