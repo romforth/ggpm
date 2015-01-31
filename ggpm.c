@@ -162,9 +162,9 @@ static int Find(int *ST, int *A, int *W, int E, int x) {
 // is follows by '...(Incomplete)'.
 static void Item(int *ST, int *S, int x) {
     int k, n = ST[x]==0 ? *S-x-1 : ST[x]-1;
-    for (k = 1; k <= n; k++) {
-        Load(ST, S, ST[x+k], 0);
-    }
+    for (k = 1; k <= n; k++)
+        putc(ST[x+k], stderr);
+
     if (ST[x] == 0)
         fprintf(stderr, "...\t(Incomplete)");
 }
@@ -414,24 +414,24 @@ BAR:      W = ST[P+9];
 // Monitor Entries and Effects
 
 Monitor1: // Unmatched ; in definition string. Treated as <;>
-          fprintf(stderr, "\nMONITOR: Unmatched semicolon in definition of");
+          fprintf(stderr, "\nMONITOR: Unmatched semicolon in definition of ");
           Item(ST, &S, P+2);
           printf("\nIf this has been quoted the result would be \n");
           goto Copy;
 Monitor2: // Unquoted ~ in argument list in input stream. Treat as <~>
-          fprintf(stderr, "\nMONITOR: Unquoted tilde in argument list of");
+          fprintf(stderr, "\nMONITOR: Unquoted tilde in argument list of ");
           Item(ST, &S, F+2);
           printf("\nIf this had been quoted the result would be \n");
           goto Copy;
 Monitor3: // Impossible character (negative) as argument number. Terminate.
-          fprintf(stderr, "\n MONITOR: impossible argument number in definition of");
+          fprintf(stderr, "\nMONITOR: impossible argument number in definition of ");
           Item(ST, &S, P+2);
           goto Monitor11;
 Monitor4: // Not enough argument supplied in call. Terminate.
           fprintf(stderr, "\nMONITOR: No argument ");
           H = 0;
-          Load(ST, &S, A, H);
-          printf("in call for");
+          putc(A, stderr);
+          printf("in call for ");
           Item(ST, &S, P+2);
           goto Monitor11;
 Monitor5: // Terminator in impossible place; if C=0, this is the input stream.
@@ -439,25 +439,25 @@ Monitor5: // Terminator in impossible place; if C=0, this is the input stream.
           // list. Probably due to a missing semicolon: Final semicolon inserted.
           fprintf(stderr, "\nMONITOR: Terminator in ");
           if (C==0) {
-              fprintf(stderr, "input strean. Probably machine error.");
+              fprintf(stderr, "input stream. Probably machine error.");
               goto Monitor11;
           }
           fprintf(stderr, "argument list for ");
           Item(ST, &S, F+2);
-          fprintf(stderr, "\nProbably due to a semicolon missing from the definition of");
+          fprintf(stderr, "\nProbably due to a semicolon missing from the definition of ");
           Item(ST, &S, P+2);
-          fprintf(stderr, "If a final semicolon is added the result is \n");
+          fprintf(stderr, "If a final semicolon is added the result is\n");
           C = C - 1;
           goto Apply;
 Monitor7: // Undefined macro name. Terminate
-          fprintf(stderr, "\nMONITOPR: Undefined name ");
+          fprintf(stderr, "\nMONITOR: Undefined name ");
           Item(ST, &S, W);
           goto Monitor11;
 Monitor8: // Wrong exit (not C=H=0). Machine error: Terminate.
           fprintf(stderr, "\nMONITOR: Unmatched >. Probably machine error.");
           goto Monitor11;
 Monitor9: // Update string too long. Terminate.
-          fprintf(stderr, "\nMonitor: Update argument too long for ");
+          fprintf(stderr, "\nMONITOR: Update argument too long for ");
           Item(ST, &S, P+9);
           goto Monitor11;
 Monitor10: // Non-digit in argument for BIN. Terminate
@@ -465,17 +465,17 @@ Monitor10: // Non-digit in argument for BIN. Terminate
           goto Monitor11;
 Monitor11: // General monitor after irremediable errors.
           W = 20;
-          fprintf(stderr, "\nCurrent macros are");
+          fprintf(stderr, "\nCurrent macros are ");
           while (P != 0 || F != 0) {
               int r, W1;
               if (P > F) {
             	  W1 = P+2;
             	  P = ST[P];
-                  fprintf(stderr, "\nAlready entered");
+                  fprintf(stderr, "\nAlready entered ");
               } else {
                    W1 = F+2;
                    F = ST[F];
-                   fprintf(stderr, "\nNot yet entered");
+                   fprintf(stderr, "\nNot yet entered ");
               }
               for (r=1; r <= W; r++) {
                   Item(ST, &S, W1);
