@@ -39,7 +39,7 @@ void usage(void) {
 "Exit status is 0 for success, 1 for failure.\n"
 "\n"
 "Report bugs to: sphinx.pinastri@gmail.org\n"
-"ggpm home page: <http://www.gnu.org/software/m4/>\n"
+"ggpm home page: <https://code.google.com/p/ggpm/>\n"
 );
 }
 

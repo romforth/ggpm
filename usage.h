@@ -1,4 +1,4 @@
-/* Prototypes of usage() and version functions.
+/* Prototypes of usage() and version() functions.
 
    Copyright (C) 2014-2015 P. Cherepanov and E. Batyrova.
 
