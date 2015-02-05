@@ -207,23 +207,27 @@ Start:
 		  case '~': goto LoadArg;
 		  case Marker: goto EndFn;
 		  case '>': goto Exit;
-		  case EOF: goto Exit;
+		  case EOF:
+	         return;
 		  }
 
 Copy:     Load(ST, &S, A, H);
 Scan:     if (q == 1)
 	          goto Start;
   Q2:     NextCh(ST, &A, &C);
-          if (A == '<') {
-              q = q+1;
+          if (A == EOF) {
+              fprintf(stderr, "Unexpected EOF in quoted string.\n");
+              return;
+          } else if (A == '<') {
+              q++;
               goto Copy;
-          }
-          if (A != '>')
-        	  goto Copy;
-          q = q - 1;
-          if (q == 1)
-        	  goto Start;
-          else
+          } else if(A == '>') {
+              q--;
+              if (q == 1)
+                  goto Start;
+              else
+                  goto Copy;
+          } else
         	  goto Copy;
 // Warning Character Actions
 Fn:
@@ -330,7 +334,7 @@ EndFn:    if (F > P)
 
   Exit:   if (C!=0 || H!=0)
               goto Monitor8;
-          exit(0);
+          return;
 
 // Machine code macros
 DEF:      if (H != 0) {
@@ -466,14 +470,14 @@ Monitor10: // Non-digit in argument for BIN. Terminate
 Monitor11: // General monitor after irremediable errors.
           W = 20;
           fprintf(stderr, "\nCurrent macros are ");
-          while (P != 0 || F != 0) {
+          while (P != 0 && F != 0) {
               int r, W1;
               if (P > F) {
-            	  W1 = P+2;
+            	  W1 = P + 2;
             	  P = ST[P];
                   fprintf(stderr, "\nAlready entered ");
               } else {
-                   W1 = F+2;
+                   W1 = F + 2;
                    F = ST[F];
                    fprintf(stderr, "\nNot yet entered ");
               }
@@ -488,9 +492,8 @@ Monitor11: // General monitor after irremediable errors.
                       fprintf(stderr, "\nArg %d\t",r);
               }
               W = 1;
-
           }
-          fprintf(stderr, "\nEnd of monitor printing");
+          fprintf(stderr, "\nEnd of monitor printing\n");
           A = 'Q';
           Load(ST, &S, A, H);
           if (P > F)

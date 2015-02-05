@@ -1,0 +1,53 @@
+1. $DEF,VERSE, <
+Old Macdonald had a farm, E-I-E-I-O,
+And on this farm he had some ~1, E-I-E-I-O!
+With a ~2 ~2 here and a ~2 ~2 there,
+Here a ~2 there a ~2 everywhere a ~2 ~2,
+Old Macdonald had a farm, E-I-E-I-O.
+>;
+$VERSE,chicks,cheep;
+$VERSE,ducks,quack;
+$VERSE,turkeys,gobble;
+ etc., etc.,
+
+2. SONG FROM A CHILDREN'S GAME
+$DEF,VERSE,<~1~1
+Hay do diddley ho ~1
+>;
+$DEF,LINE,<
+The ~1 wants a ~2>;
+$DEF,FORM,<$VERSE,$LINE,~1,~2;;>;
+$FORM,farmer,wife;
+$FORM,wife,child;
+$FORM,child,dog;
+$VERSE,
+We all pet the dog;
+
+$DEF,S,<$1,2,3,4,5,6,7,8,9,$DEF,1,<~>~1;;>;
+$DEF,P,<$N,0,1,2,3,4,5,6,7,8,$DEF,N,<~>~1;;>;
+$DEF,W,<$L,One,Two,Three,Four,Five,Six,Seven,Eight,Nine,$DEF,L,<~>~1;;>;
+$DEF,HEAD,<
+$W,~1; men went to mow, went to mow a meadow,
+>;
+3. $DEF,END,<
+One man and his dog went to mow a meadow>;
+$DEF,TAIL,<$W,~1; men, $~1,$DEF,~1,<$TAIL,$P,>~1<;;>;$DEF,6,<
+$TAIL,5;>;$DEF,2,<$END;>;;>;
+$DEF,VERSE,<
+$HEAD,~1;$TAIL,~1;>;
+One man went to mow, went to mow a meadow,$END;
+$REST,2,$DEF,REST,<$VERSE,~1;$~1,
+$DEF,~1,<.$REST,$S,>~1<;;>;$DEF,9,<!>;;>;;
+
+$DEF,VERSES,<$VERSES~1,$DEF,VERSES~1,<$VERSES,$P,>~1<;;>;
+$DEF,VERSES1,4.  ALTERNATIVE METHOD;;$VERSE,~1;>;
+$DEF,W,<$L,One man,Two men,Three men,Four men,Five men,Six men,Seven men,Eight men,Nine men,$DEF,L,<~>~1;;>;
+$DEF,HEAD,<
+$W,~1; went to mow, went to mow a meadow>;
+$DEF,REST,<$REST~1,$DEF,REST~1,<$W,>~1<;
+$REST,$P,>~1<;;>;$DEF,REST1,<One man and his dog, went to mow a meadow>;;>;
+$DEF,VERSE,<
+$HEAD,~1;
+$REST,~1;>;
+$VERSES,9;
+>
