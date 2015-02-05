@@ -25,22 +25,24 @@
 void GPM(int);
 
 int debug_flags = 0;
+int stack_size = 1000000;
+char *output_fname = 0;
 FILE *input, *output;
 
 int main (int argc, char **argv) {
     int c;
 
-    static struct option long_options[] =
-      { {"help",    no_argument,       0, 0},
-	{"version", no_argument,       0, 1},
-	{"out",     required_argument, 0, 'o'},
-	{"debug",   required_argument, &debug_flags, 'd'},
-	{0, 0, 0, 0}
-      };
+static struct option long_options[] = {
+    {"help",    no_argument,       0, 0},
+    {"version", no_argument,       0, 1},
+    {"out",     required_argument, 0, 'o'},
+    {"stack",   required_argument, 0, 's'},
+    {0, 0, 0, 0}
+};
 
     int option_index = 0;
 
-    while((c = getopt_long (argc, argv, "abc:d:f:", long_options, &option_index)) != -1) {
+    while((c = getopt_long (argc, argv, "s:", long_options, &option_index)) != -1) {
 
         switch (c) {
           case 0: /* help */
@@ -51,23 +53,15 @@ int main (int argc, char **argv) {
             version();
             exit(0);
 
-          case 'a':
-            puts ("option -a\n");
-            break;
-          case 'b':
-            puts ("option -b\n");
-            break;
-
-          case 'c':
-            printf ("option -c with value `%s'\n", optarg);
+          case 's':
+            if(sscanf(optarg, "%d", &stack_size) != 1 || stack_size < 1000) {
+            	fprintf(stderr, "Incorrect -s (--stack) value = %s\n", optarg);
+            	exit(1);
+            }
             break;
 
-          case 'd':
-            printf ("option -d with value `%s'\n", optarg);
-            break;
-
-          case 'f':
-            printf ("option -f with value `%s'\n", optarg);
+          case 'o':
+        	output_fname = optarg;
             break;
 
           case '?':
@@ -100,15 +94,15 @@ int main (int argc, char **argv) {
     	  error(1, "Cannot open output file");
       optind++;
     }
-  GPM(10000);
+  GPM(stack_size);
   if (input != stdin)
 	  fclose(input);
   if (output != stdout)
 	  fclose(output);
-  exit (0);
+  return 0;
 }
 
-#define Marker (-2 << 20)
+#define MARKER 0x80000000
 
 int A, W;
 int H=0, P=0, F=0, C=0;
@@ -205,7 +199,7 @@ Start:
 		  case ',': goto NextItem;
 		  case ';': goto Apply;
 		  case '~': goto LoadArg;
-		  case Marker: goto EndFn;
+		  case MARKER: goto EndFn;
 		  case '>': goto Exit;
 		  case EOF:
 	         return;
@@ -254,7 +248,7 @@ Apply:    if (P > F)
             int f0 = ST[F];
             int h0 = ST[F-1];
         	ST[H] = S - H;
-            ST[S] = Marker;
+            ST[S] = MARKER;
             ST[F-1] = S - F + 2;
             ST[F] = P;
             ST[F+1] = C;
@@ -293,7 +287,7 @@ LoadArg:  if (P==0) {
         	  goto Monitor3;
           for (r = 0; r < A - '0'; r++) {
               W = W + ST[W];
-              if (ST[W] == Marker)
+              if (ST[W] == MARKER)
             	  goto Monitor4;
           }
           for (r = 1; r < ST[W]; r++) {
@@ -349,7 +343,7 @@ DEF:      if (H != 0) {
 // Section 7 as it leaves EndFn to copy back the definition.
 VAL:      if(!Find(ST, &A, &W, E, P+6))
 	          goto Monitor7;
-          while (ST[W+1] != Marker) {
+          while (ST[W+1] != MARKER) {
               A = ST[W+1];
               W = W+1;
               Load(ST, &S, A, H);
@@ -368,7 +362,7 @@ BIN:      W = 0;
         	  A = P+8;
           else
         	  A = P+7;
-          while (ST[A] != Marker) {
+          while (ST[A] != MARKER) {
         	  int x = ST[A]-'0';
         	  if (x < 0 || x > 9)
         		  goto Monitor9;
@@ -486,7 +480,7 @@ Monitor11: // General monitor after irremediable errors.
                   if (ST[W1] == 0)
                       break;
                   W1 = W1 + ST[W1];
-                  if (ST[W1] == Marker)
+                  if (ST[W1] == MARKER)
                 	  break;
                   if (W!=1)
                       fprintf(stderr, "\nArg %d\t",r);
