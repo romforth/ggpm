@@ -12,10 +12,16 @@ RELOBJS = $(R)ggpm.o $(R)usage.o
 all : release
 	
 
-debug : debugbin/$(progname)
+love: notwar release
 	
 
-release: bin/$(progname)
+notwar:
+	echo "\\nNot war?\\n"
+
+debug : debugbin debugobj debugbin/$(progname)
+	
+
+release: bin obj bin/$(progname)
 	
 
 clean:
@@ -23,6 +29,18 @@ clean:
 
 debugclean:
 	rm -f $(D)*.o debugbin/$(progname)
+
+bin:
+	mkdir -p bin
+
+obj:
+	mkdir -p obj
+
+debugbin:
+	mkdir -p debugbin
+
+debugobj:
+	mkdir -p debugobj
 
 debugbin/$(progname) : $(DBGOBJS)
 	$(CC)  $(LDFLAGS) -o debugbin/$(progname) $(DBGOBJS)

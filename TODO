@@ -1,16 +1,13 @@
 Known bugs
 ==========
-Error reporting (=monitors) are not yet tested.
-Operators other than DEF are not yet tested.
+None
 
 Extensions
 ==========
 
-Add a stack size option.
 Add a check for stack overflow.
 Add a DNL predefined macro or do something about '\n' after macro definitions.
 Clean up usage() text.
-Create bin, debugbin, obj, debugobj directories.
 Add a profiling target to Makefile.
 Concatenate multiple files given on the command line to implement
   standard header inclusion without changing the language.
