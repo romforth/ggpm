@@ -27,6 +27,7 @@ void GPM(int);
 int debug_flags = 0;
 int stack_size = 1000000;
 char *output_fname = 0;
+int extended = 0;
 FILE *input, *output;
 
 int main (int argc, char **argv) {
@@ -37,12 +38,13 @@ static struct option long_options[] = {
     {"version", no_argument,       0, 1},
     {"out",     required_argument, 0, 'o'},
     {"stack",   required_argument, 0, 's'},
+    {"extended",no_argument,       0, 'e'},
     {0, 0, 0, 0}
 };
 
     int option_index = 0;
 
-    while((c = getopt_long (argc, argv, "s:", long_options, &option_index)) != -1) {
+    while((c = getopt_long (argc, argv, "o:s:e", long_options, &option_index)) != -1) {
 
         switch (c) {
           case 0: /* help */
@@ -62,6 +64,10 @@ static struct option long_options[] = {
 
           case 'o':
         	output_fname = optarg;
+            break;
+
+          case 'e':
+            extended = 1;
             break;
 
           case '?':
@@ -357,21 +363,28 @@ UPDATE:   if (!Find(ST, &A, &W, E, P+6))
           for (r=1; r <= ST[A]; r++)
               ST[W+r] = ST[A+r];
           goto EndFn;
-BIN:      W = 0;
-          if (ST[P+7] == '+' || ST[P+7] == '-')
-        	  A = P+8;
-          else
-        	  A = P+7;
-          while (ST[A] != MARKER) {
-        	  int x = ST[A]-'0';
-        	  if (x < 0 || x > 9)
-        		  goto Monitor9;
-              W = 10*W + x;
-              A += 1;
+BIN:      { int sign = 1;
+            A = P + 7;
+            if (extended) {
+                while (isspace(ST[A]))
+                    A++;
+            }
+            if (ST[A] == '+' )
+                A++;
+            else if(ST[A] == '-')
+                A++, sign = -1;
+            W = 0;
+            while (ST[A] != MARKER) {
+                int x = ST[A] - '0';
+                if (x < 0 || x > 9)
+                    goto Monitor9;
+                W = 10*W + x;
+                A += 1;
+            }
+            ST[S] = sign * W;
+            S += 1;
+            goto EndFn;
           }
-          ST[S] = ST[P+7] == '-' ? -W : W;
-          S += 1;
-          goto EndFn;
 DEC:      W = ST[P+7];
           if (W < 0) {
               W = -W;
