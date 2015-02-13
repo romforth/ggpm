@@ -15,6 +15,7 @@
    along with this program; if not, if not, see <http://www.gnu.org/licenses/>.
 */
 
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -29,6 +30,11 @@ int stack_size = 1000000;
 char *output_fname = 0;
 int extended = 0;
 FILE *input, *output;
+
+static void error(int rc, const char *msg) {
+    fprintf(stderr, "%s\n", msg);
+	exit(rc);
+}
 
 int main (int argc, char **argv) {
     int c;
@@ -377,7 +383,7 @@ BIN:      { int sign = 1;
             while (ST[A] != MARKER) {
                 int x = ST[A] - '0';
                 if (x < 0 || x > 9)
-                    goto Monitor9;
+                    goto Monitor10;
                 W = 10*W + x;
                 A += 1;
             }
