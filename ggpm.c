@@ -115,18 +115,23 @@ static struct option long_options[] = {
 }
 
 #define MARKER 0x80000000
+#define countof(x) (sizeof(x)/sizeof(*x))
 
-int A, W;
-int H=0, P=0, F=0, C=0;
-int  S=39, E=33, q=1;
-int *ST;
 const int MST[] = { -1, 4, 'D','E','F',-1,
-              0,4,'V','A','L',-2,
-              6, 7, 'U','P','D','A','T','E',-3,
+               0,4,'V','A','L',-2,
+               6,7,'U','P','D','A','T','E',-3,
               12,4,'B','I','N',-4,
               21,4,'D','E','C',-5,
               27,4,'B','A','R',-6};
 
+const int MSTex[] = { 33, 5, 'G','E','T','C',-7,
+              39, 5,'G','E','T','W',-8,
+              46, 5, 'G','E','T','L',-9};
+
+int A, W;
+int H=0, P=0, F=0, C=0;
+int  S=countof(MST), E=countof(MST) - 6, q=1;
+int *ST;
 
 static void NextCh(int *ST, int *A, int *C) {
 	if (*C == 0)
@@ -176,14 +181,17 @@ static void Item(int *ST, int *S, int x) {
 }
 
 
-// CPL program for GPM
 void GPM(int n) {
-
 // n is the stack size allowed. This should be as large as possible --
 // say 10000.
     int r;
     ST = (int *)malloc((n+1)*sizeof(*ST));
     memcpy(ST, MST, sizeof(MST));
+    if (extended) {
+        memcpy(ST+countof(MST), MSTex, sizeof(MSTex));
+        S = countof(MST) + countof(MSTex);
+        E = S - 7;
+    }
 
 // The name-value pairs for the six machine code macros are first assembled
 // in the vector MST and then copied into the base of the stack.
@@ -282,6 +290,28 @@ Apply:    if (P > F)
         	  case 4: goto BIN;
         	  case 5: goto DEC;
         	  case 6: goto BAR;
+              case 7:
+                  A = getc(stdin);
+                  if (A != EOF)
+                      Load(ST, &S, A, H);
+                  goto EndFn;
+              case 8:
+                  while (isspace(A = getc(stdin)))
+                      ;
+                  ungetc(A, stdin);
+                  while((A = getc(stdin)) != EOF && !isspace(A))
+                      Load(ST, &S, A, H);
+                  ungetc(A, stdin);
+                  goto EndFn;
+              case 9:
+                  while((A = getc(stdin)) != EOF && A != '\r' && A != '\n')
+                      Load(ST, &S, A, H);
+                  if (A == '\r') {
+                      A = getc(stdin);
+                      if (A != '\n')
+                          ungetc(A, stdin);
+                  }
+                  goto EndFn;
         	  }
           }
           C = W + 1;
@@ -513,5 +543,4 @@ Monitor11: // General monitor after irremediable errors.
         	  goto EndFn;
           else
               goto Start;
-// End CPL program for GPM.
 }

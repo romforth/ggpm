@@ -62,7 +62,7 @@ and Char[x] = x+16
 || Main cycle.
 
 Start: NextCh
-    if A = '<' do $ q := q+1; to to Q2$
+    if A = '<' do $ q := q+1; go to Q2$
     go to A = '$' -> Fn,
           A = ',' -> NextItem,
           A = ';' -> Apply,
