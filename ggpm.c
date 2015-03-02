@@ -114,6 +114,8 @@ static struct option long_options[] = {
   return 0;
 }
 
+// Start GPM code. Used by ggpm2c. Don't remove.
+
 #define MARKER 0x80000000
 #define countof(x) (sizeof(x)/sizeof(*x))
 

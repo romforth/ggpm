@@ -18,10 +18,10 @@ love: notwar release
 notwar:
 	echo "\\nNot war?\\n"
 
-debug : debugbin debugobj debugbin/$(progname)
+debug : debugbin debugobj debugbin/$(progname) debugbin/compact
 	
 
-release: bin obj bin/$(progname)
+release: bin obj bin/$(progname) bin/compact
 	
 
 clean:
@@ -47,6 +47,12 @@ debugbin/$(progname) : $(DBGOBJS)
 
 bin/$(progname) : $(RELOBJS)
 	$(CC)  $(LDFLAGS) -o bin/$(progname) $(RELOBJS)
+
+debugbin/compact : compact.c
+	$(CC)  $(LDFLAGS) $(DBGFLAGS) $(CFLAGS) -o debugbin/compact compact.c
+
+bin/compact : compact.c
+	$(CC)  $(LDFLAGS) $(RELFLAGS) $(CFLAGS) -o bin/compact compact.c
 
 obj/%.o : %.c
 	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o $@ $<
