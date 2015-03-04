@@ -20,8 +20,10 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <getopt.h>
-
 #include "usage.h"
+
+// Defined differently in ggpm2c .
+#define getc_prog(x) getc(x)
 
 void GPM(int);
 
@@ -137,7 +139,7 @@ int *ST;
 
 static void NextCh(int *ST, int *A, int *C) {
 	if (*C == 0)
-          *A = getc(input);
+          *A = getc_prog(input);
     else {
         *A = ST[*C];
         *C = *C+1;

@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
+#include "store.h"
 
 #define cases(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z) \
     case a:case b:case c:case d:case e:case f:case g:case h:\
@@ -26,54 +27,9 @@
     case q:case r:case s:case t:case u:case v:case w:case x:\
     case y:case z:
 
-#define LINEWIDTH 80
-
-typedef struct _StoreState {
-    int col;
-    int last;
-} StoreState;
-
-FILE *input, *output;
-
 static void error(int rc, const char *msg) {
     fprintf(stderr, "%s\n", msg);
         exit(rc);
-}
-
-static void store(int c, StoreState *ss) {
-    if (ss->col <= 0) {
-        putc('"', output);
-        ss->col += 1;
-    }
-    if (c < ' ') {
-        ss->col += 2;
-        putc('\\', output);
-        if (c == '\r')
-            putc('r', output);
-        else if (c == '\n')
-            putc('n', output);
-        else if (c == '\t')
-            putc('t', output);
-        else {
-            putc('0' + ((c >> 6) & 3), output);
-            putc('0' + ((c >> 3) & 7), output);
-            putc('0' + (c & 7), output);
-            ss->col += 2;
-        }
-    } else {
-        if (c == '"' || c == '\\') {
-           putc('\\', output);
-           ss->col += 1;
-        }
-        putc(c, output);
-        ss->col += 1;
-    }
-    if (ss->col > LINEWIDTH - 2) {
-        putc('"', output);
-        putc('\n', output);
-        ss->col = 0;
-    }
-    ss->last = c;
 }
 
 static int is_namechar(int c) {
@@ -86,7 +42,8 @@ int main (int argc, char **argv) {
     int column = 0, last_stored = 0;
     char buf[300];
     enum {kComment, kCPPcomment, kString, kChar, kSpace, kProgram} state = kProgram;
-    StoreState ss = {0, 0};
+    StoreState ss = {0, 0, 0};
+    FILE *input;
 
     if (argc != 3)
         error(1, "compact INPUT OUTPUT\n");
@@ -94,8 +51,8 @@ int main (int argc, char **argv) {
     if (input == 0)
         error(1, "Cannot open input file");
 
-    output = fopen(argv[2],"wb");
-    if (output == 0)
+    ss.out = fopen(argv[2],"wb");
+    if (ss.out == 0)
         error(1, "Cannot open output file");
     while(fscanf(input,"%[^\n]\n", buf) == 1) {
         if(!strncmp(buf,"// Start GPM code", 17))
@@ -103,7 +60,7 @@ int main (int argc, char **argv) {
     }
     error(1,"Cannot find \"// Start GPM code\"");
   has_gpm:
-    fputs("char gpm_source[]=\n", output);
+    fputs("char ggpm_source[]=\n", ss.out);
     goto Program;
   Comment:
      prev = 0;
@@ -188,11 +145,12 @@ int main (int argc, char **argv) {
      }
      /* fall through */
  End:
-    fputs("\";\nchar gpm_source_len[] = sizeof(gpm_source) - 1;\n", output);
+    finish(&ss);
+    fputs(";\nint ggpm_source_len = sizeof(ggpm_source) - 1;\n", ss.out);
 
     if (input != stdin)
           fclose(input);
-    if (output != stdout)
-          fclose(output);
+    if (ss.out != stdout)
+          fclose(ss.out);
     return 0;
 }

@@ -18,10 +18,10 @@ love: notwar release
 notwar:
 	echo "\\nNot war?\\n"
 
-debug : debugbin debugobj debugbin/$(progname) debugbin/compact
+debug : debugbin debugobj debugbin/$(progname) debugbin/compact debugbin/ggpm2c
 	
 
-release: bin obj bin/$(progname) bin/compact
+release: bin obj bin/$(progname) bin/compact bin/ggpm2c
 	
 
 clean:
@@ -48,11 +48,33 @@ debugbin/$(progname) : $(DBGOBJS)
 bin/$(progname) : $(RELOBJS)
 	$(CC)  $(LDFLAGS) -o bin/$(progname) $(RELOBJS)
 
-debugbin/compact : compact.c
-	$(CC)  $(LDFLAGS) $(DBGFLAGS) $(CFLAGS) -o debugbin/compact compact.c
+debugbin/compact : debugobj/compact.o debugobj/store.o
+	$(CC)  $(LDFLAGS) $(DBGFLAGS) $(CFLAGS) -o debugbin/compact debugobj/compact.o debugobj/store.o
 
-bin/compact : compact.c
-	$(CC)  $(LDFLAGS) $(RELFLAGS) $(CFLAGS) -o bin/compact compact.c
+bin/compact : obj/compact.o obj/store.o
+	$(CC)  $(LDFLAGS) $(RELFLAGS) $(CFLAGS) -o bin/compact obj/compact.o obj/store.o
+
+debugbin/ggpm2c : debugobj/ggpm2c.o debugobj/ggpm_compacted.o debugobj/store.o
+	$(CC)  $(LDFLAGS) $(DBGFLAGS) $(CFLAGS) -o debugbin/ggpm2c debugobj/ggpm2c.o debugobj/ggpm_compacted.o debugobj/store.o
+
+bin/ggpm2c : obj/ggpm2c.o obj/ggpm_compacted.o obj/store.o
+	$(CC)  $(LDFLAGS) $(RELFLAGS) $(CFLAGS) -o bin/ggpm2c obj/ggpm2c.o obj/ggpm_compacted.o obj/store.o
+
+
+
+
+obj/ggpm_compacted.c : ggpm.c bin/compact
+	bin/compact ggpm.c obj/ggpm_compacted.c
+
+debugobj/ggpm_compacted.c : ggpm.c debugbin/compact
+	debugbin/compact ggpm.c debugobj/ggpm_compacted.c
+
+obj/ggpm_compacted.o : obj/ggpm_compacted.c
+	$(CC)  $(LDFLAGS) $(RELFLAGS) $(CFLAGS) -c -o obj/ggpm_compacted.o  obj/ggpm_compacted.c
+
+debugobj/ggpm_compacted.o : debugobj/ggpm_compacted.c
+	$(CC)  $(LDFLAGS) $(DBGFLAGS) $(CFLAGS) -c -o debugobj/ggpm_compacted.o  debugobj/ggpm_compacted.c
+
 
 obj/%.o : %.c
 	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o $@ $<

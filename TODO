@@ -1,6 +1,8 @@
 Known bugs
 ==========
-None
+ggpm2c ignores IO errors.
+ggpm2c ignores options.
+Handle all dependencies in the Makefile. Remove wildcard compilation.
 
 Extensions
 ==========
