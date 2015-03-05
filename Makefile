@@ -61,8 +61,6 @@ bin/ggpm2c : obj/ggpm2c.o obj/ggpm_compacted.o obj/store.o
 	$(CC)  $(LDFLAGS) $(RELFLAGS) $(CFLAGS) -o bin/ggpm2c obj/ggpm2c.o obj/ggpm_compacted.o obj/store.o
 
 
-
-
 obj/ggpm_compacted.c : ggpm.c bin/compact
 	bin/compact ggpm.c obj/ggpm_compacted.c
 
@@ -76,9 +74,27 @@ debugobj/ggpm_compacted.o : debugobj/ggpm_compacted.c
 	$(CC)  $(LDFLAGS) $(DBGFLAGS) $(CFLAGS) -c -o debugobj/ggpm_compacted.o  debugobj/ggpm_compacted.c
 
 
-obj/%.o : %.c
-	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o $@ $<
+obj/compact.o : compact.c store.h
+	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o obj/compact.o compact.c
+debugobj/compact.o : compact.c store.h
+	$(CC) $(CPPFLAGS) $(DEBFLAGS) $(CFLAGS) -c -o debugobj/compact.o compact.c
 
-debugobj/%.o : %.c
-	$(CC) $(CPPFLAGS) $(DBGFLAGS) $(CFLAGS) -c -o $@ $<
+obj/ggpm.o : ggpm.c usage.h
+	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o obj/ggpm.o ggpm.c
+debugobj/ggpm.o : ggpm.c usage.h
+	$(CC) $(CPPFLAGS) $(DEBFLAGS) $(CFLAGS) -c -o debugobj/ggpm.o ggpm.c
 
+obj/ggpm2c.o : ggpm2c.c store.h version.h
+	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o obj/ggpm2c.o ggpm2c.c
+debugobj/ggpm2c.o : ggpm2c.c store.h version.h
+	$(CC) $(CPPFLAGS) $(DEBFLAGS) $(CFLAGS) -c -o debugobj/ggpm2c.o ggpm2c.c
+
+obj/store.o : store.c store.h
+	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o obj/store.o store.c
+debugobj/store.o : store.c version.h
+	$(CC) $(CPPFLAGS) $(DEBFLAGS) $(CFLAGS) -c -o debugobj/store.o store.c
+
+obj/usage.o : usage.c usage.h version.h
+	$(CC) $(CPPFLAGS) $(RELFLAGS) $(CFLAGS) -c -o obj/usage.o usage.c
+debugobj/usage.o : usage.c usage.h version.h
+	$(CC) $(CPPFLAGS) $(DEBFLAGS) $(CFLAGS) -c -o debugobj/usage.o usage.c

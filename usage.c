@@ -18,9 +18,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "usage.h"
+#include "version.h"
 
 void version(void) {
-    printf("1.0\n");
+    printf(VERSION);
 }
 
 void usage(void) {

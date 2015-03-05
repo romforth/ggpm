@@ -25,10 +25,10 @@
 // Defined differently in ggpm2c .
 #define getc_prog(x) getc(x)
 
-void GPM(int);
+void GPM(unsigned long);
 
 int debug_flags = 0;
-int stack_size = 1000000;
+unsigned long stack_size = 1024*1024;
 char *output_fname = 0;
 int extended = 0;
 FILE *input, *output;
@@ -64,7 +64,7 @@ static struct option long_options[] = {
             exit(0);
 
           case 's':
-            if(sscanf(optarg, "%d", &stack_size) != 1 || stack_size < 1000) {
+            if(sscanf(optarg, "%lu", &stack_size) != 1 || stack_size < 1000) {
             	fprintf(stderr, "Incorrect -s (--stack) value = %s\n", optarg);
             	exit(1);
             }
@@ -185,7 +185,7 @@ static void Item(int *ST, int *S, int x) {
 }
 
 
-void GPM(int n) {
+void GPM(unsigned long n) {
 // n is the stack size allowed. This should be as large as possible --
 // say 10000.
     int r;
