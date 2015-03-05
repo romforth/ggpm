@@ -38,7 +38,7 @@ static int is_namechar(int c) {
 
 // String continuation is ignored because it's not used in GPM source.
 int main (int argc, char **argv) {
-    int c, prev = 0, prev_prev=0;
+    int c, prev = 0, prev_prev=0, rc = 0;
     int column = 0, last_stored = 0;
     char buf[300];
     enum {kComment, kCPPcomment, kString, kChar, kSpace, kProgram} state = kProgram;
@@ -60,7 +60,8 @@ int main (int argc, char **argv) {
     }
     error(1,"Cannot find \"// Start GPM code\"");
   has_gpm:
-    fputs("char ggpm_source[]=\n", ss.out);
+    if (fputs("char ggpm_source[]=\n", ss.out) == EOF)
+        goto wr_error;
     goto Program;
   Comment:
      prev = 0;
@@ -81,9 +82,11 @@ int main (int argc, char **argv) {
      while(!((c=getc(input)) == EOF || (c == '"' && (prev != '\\' ||  prev_prev == '\\')))) {
          prev_prev = prev;
          prev = c;
-         store(c, &ss);
+         if (store(c, &ss) < 0)
+             goto wr_error;
      }
-     store('"', &ss);
+     if (store('"', &ss) < 0)
+         goto wr_error;
      if (c == EOF)
          goto End;
      goto Program;
@@ -92,7 +95,8 @@ int main (int argc, char **argv) {
      while(!((c=getc(input)) == EOF || (c == '\'' && (prev != '\\' ||  prev_prev == '\\')))) {
          prev_prev = prev;
          prev = c;
-         store(c, &ss);
+         if (store(c, &ss) < 0)
+             goto wr_error;
      }
      store('\'', &ss);
      if (c == EOF)
@@ -103,7 +107,8 @@ int main (int argc, char **argv) {
          ;
      ungetc(c, input);
      if (is_namechar(ss.last) && is_namechar(c))
-         store(' ', &ss);
+         if (store(' ', &ss) < 0)
+             goto wr_error;
      /* fall through */
  Program:
      while((c=getc(input)) != EOF) {
@@ -111,7 +116,8 @@ int main (int argc, char **argv) {
          cases('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z')
          cases('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z')
          case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':case '_':
-             store(c, &ss);
+             if (store(c, &ss) < 0)
+                 goto wr_error;
              break;
          case ' ':case '\t':case '\r':case '\n':
              goto Space;
@@ -123,34 +129,49 @@ int main (int argc, char **argv) {
                  goto Comment;
              } else {
                  ungetc(c2, input);
-                 store(c, &ss);
+                 if (store(c, &ss) < 0)
+                     goto wr_error;
              }
              break;
          }
          case '\'':
-             store(c, &ss);
+             if (store(c, &ss) < 0)
+                 goto wr_error;
              goto Char;
          case '"':
-             store(c, &ss);
+             if (store(c, &ss) < 0)
+                 goto wr_error;
              goto String;
          case '#':
-             store('#', &ss);
-             while((c=getc(input)) != EOF && c != '\n')
-                 store(c, &ss);
-             store('\n', &ss);
+             if (store('#', &ss) < 0)
+                 goto wr_error;
+             while((c=getc(input)) != EOF && c != '\n') {
+                 if (store(c, &ss) < 0)
+                     goto wr_error;
+             }
+             if (store('\n', &ss) < 0)
+                 goto wr_error;
              goto Space;
          default:
-             store(c, &ss);
+             if (store(c, &ss) < 0)
+                 goto wr_error;
          }
      }
      /* fall through */
  End:
-    finish(&ss);
-    fputs(";\nint ggpm_source_len = sizeof(ggpm_source) - 1;\n", ss.out);
+    if (finish(&ss) < 0)
+        goto wr_error;
+    if (fputs(";\nint ggpm_source_len = sizeof(ggpm_source) - 1;\n", ss.out) == EOF)
+        goto wr_error;
 
+finish:
     if (input != stdin)
           fclose(input);
     if (ss.out != stdout)
           fclose(ss.out);
-    return 0;
+    return rc;
+wr_error:
+    rc = 1;
+    fprintf(stderr, "Error writing output file\n");
+    goto finish;
 }
