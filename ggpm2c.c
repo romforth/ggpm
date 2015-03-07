@@ -130,12 +130,12 @@ int main (int argc, char **argv) {
         "#include <stdio.h>\n"
         "#include <stdlib.h>\n"
         "#include <memory.h>\n"
-        "#define getc_prog(f) (pcnt >= sizeof(prog) ? EOF : prog[pcnt++])\n"
+        "#define getc_prog(f) (pcnt >= sizeof(prog) - 1 ? EOF : prog[pcnt++])\n"
         "FILE *input, *output;\n"
-        "int extended=1;\n") < 0)
+        "const int extended=1;\n") < 0)
         goto wr_error;
 
-    if(fprintf(output,"char prog[]=\n") < 0)
+    if(fprintf(output,"const char prog[]=\n") < 0)
         goto wr_error;
     {
         StoreState ss = {0, 0, output};
@@ -197,12 +197,12 @@ int main (int argc, char **argv) {
             goto wr_error;
     }
     if (output_fname) {
-        if (fprintf(output, "if ((output = fopen(\"%s\",\"rb\")) == 0)\n", output_fname) < 0)
+        if (fprintf(output, "if ((output = fopen(\"%s\",\"wb\")) == 0)\n", output_fname) < 0)
             goto wr_error;
         if (fprintf(output, "{fprintf(stderr, \"Error opening %s\"); exit(1);}\n", output_fname) < 0)
             goto wr_error;
     } else {
-        if (fprintf(output, "output = stdin;\n") < 0)
+        if (fprintf(output, "output = stdout;\n") < 0)
             goto wr_error;
     }
     if (fprintf(output, "GPM(%luuL);\n", stack_size) < 0)
