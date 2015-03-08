@@ -1,0 +1,39 @@
+$DEF,REM,;$DEF,-,<$DEC,$BAR,-,$BIN,~1;,$BIN,1;;;>;$DEF,--,<$DEC,$BAR,-,$BIN,~1;,$BIN,2;;;>;
+There is a strip of cells numbered 1 to N. Each move either places
+a chip on a cell (when the cell is empty) or removes a chip from a cell
+(if there was one). Only cell 1 or the cell immediately following the first non-empty
+cell can be changed. Initially, the strip is empty. One need to fill all the cells
+on the strip.
+
+The sequence of moves required to fill the cell need to be outputted as the cell numbers.
+Placing a chip on a cell is recorded as a positive number, and removing a chip as negative.
+$REM,<
+# Python solution
+def put(n):
+    if n:
+        put(n-1)
+        print(n, end = " ")
+        get(n-1)
+
+def put2(n):
+    if n:
+        if n == 1:
+            print(n, end = " ")
+        else:
+            put(n-1)
+            print(n, end = " ")
+            put2(n-2)
+
+def get(n):
+    if n:
+        put(n-1)
+        print(-n, end = " ")
+        get(n-1)
+put2(int(input()))
+>;$DEF,put,<$~1,~1,$DEF,~1,<$put,$-,~1;; ~1 $get,$-,~1;;>;$DEF,0,;;>;$DEF,get,<$~1,~1,$DEF,~1,<$put,$-,~1;; -~1 $get,$-,~1;;>;$DEF,0,;;>;
+$DEF,put2,<$~1,~1,$DEF,~1,<$put,$-,~1;; ~1 $put2,$--,~1;;>;$DEF,0,;$DEF,1,1;;>;
+For instance, a strip with 3 cells results in the following moves:
+$put2,3;
+
+A 10 cell strip can be filled with the following moves:
+$put2,10;
