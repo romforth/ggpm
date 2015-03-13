@@ -1,0 +1,5 @@
+$DEF,+,<$DEC,$BAR,+,$BIN,~1;,$BIN,~2;;;>;
+$DEF,-,<$DEC,$BAR,-,$BIN,~1;,$BIN,~2;;;>;
+$DEF,*,<$DEC,$BAR,*,$BIN,~1;,$BIN,~2;;;>;
+$DEF,Fact,<$$arg;,$DEF,$arg;,<$*,~0,$Fact,$DEF,arg,$-,~0,1;;;;>;$DEF,0,<1>;;>;
+$Fact,$DEF,arg,10;;

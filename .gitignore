@@ -3,3 +3,8 @@ ipch*
 Release*
 ggpm.sdf
 ggpm.suo
+bin
+obj
+debugbin
+debugobj
+
