@@ -4,11 +4,21 @@ $DEF,-,<$DEC,$BAR,-,$BIN,~1;,$BIN,~2;;;>;
 $DEF,*,<$DEC,$BAR,*,$BIN,~1;,$BIN,~2;;;>;
 $DEF,/,<$DEC,$BAR,/,$BIN,~1;,$BIN,~2;;;>;
 $DEF,%,<$DEC,$BAR,R,$BIN,~1;,$BIN,~2;;;>;
-$REM,<
-def max(a, b):
-  return (a//b*a + +b//a*b) // (a//b + b//a)
+$REM,sign-py,<
+def sign(x):
+    return x if x in (0, 1, -1) else return sign(x//2)
 >;
-$DEF,max,<$/,$+,$*,$/,~1,~2;,~1;,$*,$/,~2,~1;,~2;;,$+,$/,~1,~2;,$/,~2,~1;;;>;
+$DEF,sign,<$~1,$DEF,~1,<$sign,$/,~0,2,
+;;>;$DEF,0,0;$DEF,1,1;$DEF,-1,-1;;>;
+$sign,1; $sign,0; $sign,-1;
+$sign,16; $sign,0; $sign,-16;
+$sign,15; $sign,0; $sign,-15;
+$REM,max-sign-py,<
+def max(a, b)
+    return a if sign(a-b) == 1 else b
+>;
+$DEF,max,<$$sign,$-,~1,~2,
+;;,~1,~2,$DEF,1,~1;$DEF,0,~1;$DEF,-1,~2;;>;
 $DEF,min,<$-,$+,~1,~2;,$max,~1,~2;;>;
 $max,100,101;
 $max,-100,-101;
@@ -16,28 +26,15 @@ $max,100,-101;
 $max,-100,101;
 $max,100,100;
 $max,-100,-100;
-$REM,<
-def sign(x):
-    if x in (0, 1, -1) 
-        return x
-    else
-        return sign(x//2)
+$REM,max-natural,<
+def max_natural(a, b):
+  return (a//b*a + b//a*b) // (a//b + b//a)
 >;
-$DEF,sign,<$~1,$DEF,~1,<$sign,$/,~0,2;;>;$DEF,0,0;$DEF,1,1;$DEF,-1,-1;;>;
-$sign,1; $sign,0; $sign,-1;
-$sign,16; $sign,0; $sign,-16;
-$sign,15; $sign,0; $sign,-15;
-$REM,<
-def max(a, b)
-    if sign(a-b) in (0, 1)
-        return a
-    else
-        return b
->;
-$DEF,max,<$$sign,$-,~1,~2;;,~1,~2,$DEF,1,~1;$DEF,0,~1;$DEF,-1,~2;;>;
-$max,100,101;
-$max,-100,-101;
-$max,100,-101;
-$max,-100,101;
-$max,100,100;
-$max,-100,-100;
+$DEF,max-natural,<$/,$+,$*,$/,~1,~2;,~1,
+;,$*,$/,~2,~1;,~2;;,$+,$/,~1,~2;,$/,~2,~1;;;>;
+$max-natural,100,101;
+$max-natural,-100,-101;
+$max-natural,100,-101;
+$max-natural,-100,101;
+$max-natural,100,100;
+$max-natural,-100,-100;

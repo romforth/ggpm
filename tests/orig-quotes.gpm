@@ -1,0 +1,10 @@
+$DEF,REM,;
+$REM,<This is a comment.>;
+Comments can be used $REM,
+;to break long lines without affecting the output.
+
+$DEF,lquote,<$VAL,a,$DEF,a,$BIN,60;;;>;
+$DEF,rquote,<$VAL,a,$DEF,a,$BIN,62;;;>;
+$DEF,bug,<$rquote;<$>$lquote;>;
+An old Pakman colone, SP21, used this shape to represent the character
+on a VT52 screen: $bug; Frequent players called it a cockroach.

@@ -1,0 +1,232 @@
+\documentclass[letterpaper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\linespread{1.5}
+
+%opening
+\title{GPM for a Challenge}
+\author{P. A. Cherepanov}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+A macroprocessor is a program that performs text substitution
+and is usually used to extend programming languages. An early and influential
+macroprocessor, Starchey’s GPM, is ported to the
+C language and tested on GNU/Linux and MS Windows. 
+Although GPM cannot compete with modern tools, it can be appreciated
+as yet another Turing tarpit that has a deep historic context.
+A GPM program and GPM interpreter packaged into a C file that
+can be submitted to automated program judging systems. 
+The whole package is distributed from http://code.google.com/p/ggpm
+under GNU GPL.
+\end{abstract}
+
+\section{Introduction}
+GPM (General Purpose Macrgenerator) was an early macroprocessor written
+by C. Strachey \cite{strachey} to facilitate the development of a CPL compiler.
+The detailed description of the GPM implementation made it a popular
+program, perhaps, more popular than CPL itself.
+GPM was described in a number of textbooks\cite{mck-intro, comparative},
+and adapted to rectify deficiencies of Fortran\cite{gpmx} and Cobol.
+Finally, GPM has inspired the development of a whole line of
+macroprocessors that culminated with the advent of GNU \texttt{m4} \cite{gnu-m4}.
+The latter is present on every standard GNU/Linux installation.
+Although \texttt{m4} is more convenient to use, GPM presents
+the idea of text substitution in a purer form.
+
+Strachey's description of GPM syntax \cite{strachey} is still unsurpassed
+in clarity. This brief review of GPM syntax is included here for completeness.
+
+The only operation supported by GPM is a macro call with the following syntax.
+\begin{verbatim}
+$NAME,arg_1,...,arg_n;
+\end{verbatim}
+where \texttt{NAME} is the name of a macro and \texttt{arg\_1,...,arg\_n}
+are the arguments. A few predefined macros are available at the beginning.
+New macros are defined as
+\begin{verbatim}
+$DEF,name,<definition>;
+\end{verbatim}
+where \texttt{DEF} is the name of a predefined macro that defines new macros.
+The angular brackets \texttt{<...>} are used to delay the evaluation
+of the enclosed string. 
+The macro call forms a context with macros defined within a macro call
+being local in this context. A macro definition can appear anywhere
+in a macro call. The latest definition with the same name shadows
+earlier definitions. This is the only technique to perform conditional 
+evaluation.
+
+Arithmetic operations in GPM are limited to addition, subtraction,
+multiplication, division, and remainder on signed integer numbers.
+
+\section{Preservation status}
+GPM was widely popular in the 1970s, but it gradually fell into disuse.
+Although the CPL source is preserved and documented, a CPL
+compiler is no longer available. There are no working ports of
+GPM to any modern languages either.
+
+The preservation of software should not be limited to the preservation of
+the original data. Such software often requires a contemporary
+environment that runs only on emulated hardware. 
+This is likely to stop all but the most determined users.
+Ideally, the historic software would be available to the user through
+the same installation techniques as the current one. For instance,
+KEDIT, a clone of XEDIT, a memorable editor for the IBM CMS system can be considered 
+from a conservation point of view as a fully operational replica.
+Well preserved software is not only fully operational in modern environments,
+but also incorporates a significant part of the original code.
+
+\section{Porting the GPM}
+The Strachey's article provides a detailed description of a GPM implementation
+for a Titan computer, including the full source code in the CPL language.
+However, a CPL compiler is no longer available. Even the character set assumed 
+by CPL and GPM is different from ASCII, which is
+now prevalent. Finally, modern command line programs are controlled by command line arguments and
+are expected to have separate output and error streams.
+
+This port of GPM uses the dollar sign '\$' instead the section symbol '\S'
+as the leading symbol of a macro call. If necessary, a program written
+with the traditional symbols can be easily transliterated.
+
+The port of the CPL source to C to was fairly straightforward. The simultaneous assignments
+that were widely used in the CPL source were mostly reduced to a series of ordinary assignments. 
+An introduction of a temporary variable was necessary in a few cases. Computed \texttt{goto}
+operators were replaced by \texttt{case} operators without any major change in
+the program structure.
+
+The parsing of command line parameters is based on GNU's \texttt{getopt\_long()}. 
+A basic implementation of this function is included in the MS Windows build.
+The porting process took about a man-week, which matches existing estimations 
+on the complexity of such project.
+
+A couple of errors have been encountered during the porting process.
+The statement in the CPL code
+\texttt{ ST[P+7]='-'$\rightarrow$-WW, } should be read as \texttt{ ST[P+7]='-'$\rightarrow$-W,W }
+
+Many authors have noted that the original definition of the \texttt{Successor} macro is incorrect. 
+\begin{verbatim}
+$DEF,Successor,<$~2,$DEF,~2,~1<,$Suc,>~2<;>;
+$DEF,9,<$Suc,>~1,<;,0>;;>;
+\end{verbatim}
+A. Herbert determines that the error is caused by missing quotation symbols. However, his
+version of \texttt{Successor} doesn't work with the original GPM.
+\begin{verbatim}
+$DEF,Successor,<$~2,$DEF,~2,~1<,>$Suc,>~2<;>;
+$DEF,9,<$Suc,>~1<;<,>0>;>;
+\end{verbatim}
+This port just adds an extra quotation layer around the unquoted commas. 
+\begin{verbatim}
+$DEF,Successor,<$~2,$DEF,~2,~1<<,>$Suc,>~2<;>;
+$DEF,9,<$Suc,>~1<;<,>0>;;>;
+\end{verbatim}
+
+Traditionally, macroprocessors mix input data and macro operations. This makes them unsuitable
+to for writing text utilities. This port of GPM solves this problem by adding
+\texttt{GETC}, \texttt{GETW}, \texttt{GETL} macros, that read a character,
+a word, and a line from standard input, regardless of the source
+of the GPM program.
+
+\section{Programming techniques}
+Limited syntax of GPM forces the programmer to develop a number of idioms.
+
+\subsection{Comments and line breaks}
+GPM has no direct way to add comments to the source file.
+Comments can be programmed as a macro that takes 
+one or more arguments and consumes them, returning an empty string.
+\input{|"../tools/get-fragment ../tests/orig-quotes.gpm 'DEF,REM' 'REM,<'"}
+The comment macro can also be used to split long lines in the source file.
+\input{|"../tools/get-fragment ../tests/orig-quotes.gpm 'Comments' ';to'"}
+The line can be also split inside parameters that don't directly contribute
+to the output. Extra parameters can be added to any macro call.
+
+\subsection{Quotation characters}
+The lack of direct way to output unbalanced quotation symbols, \texttt{'>'}, \texttt{'<'} is
+often mentioned as a major oversight in the original design. One of the 
+extended versions, \texttt{bgpm}, has special built-in macros to output them.
+In fact, this can easily be done through numeral-to-binary conversion.
+\input{|"../tools/get-fragment ../tests/orig-quotes.gpm 'DEF,lquote' 'DEF,rquote'"}
+
+\subsection{Conditions}
+Conditions based on the precedence of the latest macro-definitions 
+with the same name can only %Needs rewrite, sounds a bit awkward.
+compare numerals for equality. Construction of more advanced predicates
+can be started from the \texttt{\$sign} function; The algorithm can be
+expressed in Python as:
+\input{|"../tools/get-fragment-ex ../tests/orig-maximum.gpm 'REM,sign-py' '>'"}
+Which corresponds to
+\input{|"../tools/get-fragment ../tests/orig-maximum.gpm 'DEF,sign' 'DEF,0,0'"}
+An arithmetic \texttt{if} operator can be constructed on top of \texttt{\$sign}.
+For instance, \texttt{\$min} and \texttt{\$max} can be defined using the arithmetic 
+\texttt{if} as:
+\input{|"../tools/get-fragment ../tests/orig-maximum.gpm 'DEF,max,' 'DEF,min,'"}
+For positive numbers the \texttt{\$max-natural} function can be calculated more efficiently.
+\input{|"../tools/get-fragment-ex ../tests/orig-maximum.gpm 'REM,max-natural' '>'"}
+Which corresponds to:
+\input{|"../tools/get-fragment ../tests/orig-maximum.gpm 'DEF,max-natural,' '>'"}
+
+\subsection[short]{Unlimited arguments}
+GPM is often criticized for restricting the number of arguments in a macro call.
+GPM uses a single character that follows \texttt{'\textasciitilde{}'} to identify arguments. It is convenient
+to name arguments \texttt{\textasciitilde{}1} to \texttt{\textasciitilde{}9}; the following arguments are named by
+the ASCII characters that follw \texttt{'9'}. 
+
+However, this argument naming convention is not necessary for GPM's operation. The arguments
+can be passed as arbritrary named macros, defined in the superfluous arguments of the function.
+This technique effectively lifts any limits on the number of arguments. 
+Using this technique, the factorial function can be coded as:
+\input{|"../tools/get-fragment ../tests/orig-factorial-no-args.gpm 'DEF,Fact,' 'DEF,arg,10;;'"}
+
+%\section{Turing completeness}
+%It is easier to implement an equivalent model, $\mu$-recursive functions.
+
+\section{Usage}
+Software doesn't grew old. This version of GPM is as capable as the original
+one but much more usable software has appeared since 1965. The UNIX
+macroprocessor, m4, the extant member of GPM's lineage, is widely
+used in GNU configuration scripts. In every respect, it is preferable
+to GPM as a practical software tool.
+
+However, GPM is simpler and thus illustrates the idea of calculation by
+textual substitution in the most direct way. It serves as a good example
+to introduce macrogeneration to students. The small number of primitive
+operations and limited syntax positions GPM among esoteric programming
+languages.
+
+Writing non-trivial programs is a challenge. But people program in
+Intercal, BF, and Malbolge or climb Everest just because they exist. The recreation value of
+GPM is comparable with that of other esoteric languages, with the additional
+aspect of being a real software tool.
+
+\section{GPM to C converter}
+Competitive and recreational programming often uses automated testing systems
+known as online judges. The challenge is considered solved if the program
+passes all the tests. 
+
+The sites based on competitive programming offer a limited set of
+popular programming languages. The sites focused on recreation may have a 
+large selection of languages, but this port of GPM is too new to be
+included. Although GPM is now ported to C and distributed under GNU GPL, most
+likely, it will never regain its former popularity, nor the fame of BF or Intercal.
+
+However, this shortcoming is easy to work around. The source code of the
+GPM interpreter is small enough to fall within the size restrictions of
+most sites. This, the GPM program and interpreter can be bundled into a
+single executable that can be submitted as a C program.
+
+To facilitete this process, this project includes \texttt{ggpm2c} that
+takes a GPM program and converts it into a self-contained C program.
+
+\section{Conclusions}
+Strachey's GPM has been ported to the C language and extended to comply with the GNU
+guidelines. The new predefined macros that read standard input decouple
+the program and the data streams, making it possible to write text handling programs
+in GPM. The source of the GPM interpreter and a GPM program can be bundled into
+a self-contained C file that is suitable for online testing.
+The project is distributed under the GNU GPL v.3 from http://code.google.com/p/ggpm
+for everybody to share and enjoy.
+
+\bibliographystyle{plain}
+\bibliography{gpm-article}
+\end{document}

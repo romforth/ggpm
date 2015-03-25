@@ -42,6 +42,12 @@ debugbin:
 debugobj:
 	mkdir -p debugobj
 
+article: doc/gpm-article.pdf
+	
+
+doc/gpm-article.pdf: doc/gpm-article.tex doc/gpm-article.bib tools/get-fragment
+	cd doc; pdflatex -shell-escape gpm-article.tex; bibtex gpm-article.aux; pdflatex -shell-escape gpm-article.tex; pdflatex -shell-escape gpm-article.tex
+
 debugbin/$(progname) : $(DBGOBJS)
 	$(CC)  $(LDFLAGS) -o debugbin/$(progname) $(DBGOBJS)
 

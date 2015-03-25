@@ -1,0 +1,5 @@
+#/bin/sh
+# Extract fragments of GPM test programs for the article.
+echo  '\\begin{verbatim}'
+sed -n "/$2/,/$3/p" "$1"
+echo  '\\end{verbatim}'
