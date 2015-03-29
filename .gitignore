@@ -7,4 +7,7 @@ bin
 obj
 debugbin
 debugobj
-
+doc/gpm-article.aux
+doc/gpm-article.bbl
+doc/gpm-article.blg
+doc/gpm-article.log
